@@ -1,5 +1,5 @@
 {
-  "name": "wayback-snapshot-api",
+  "name": "wayback-api",
   "version": "1.0.0",
-  "description": "Wrapper for Wayback Machine API"
+  "private": true
 }
