@@ -1,5 +1,5 @@
 {
-  "name": "wayback-api",
+  "name": "wayback-snapshot-api",
   "version": "1.0.0",
   "private": true
 }
