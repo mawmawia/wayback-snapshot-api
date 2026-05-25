@@ -1,9 +1,7 @@
 export default async function handler(req, res) {
-  // CORS for RapidAPI
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   
-  // Get URL param - handles both ?url= and edge cases
   const { searchParams } = new URL(req.url, `https://${req.headers.host}`);
   const url = searchParams.get('url');
   const date = searchParams.get('date');
@@ -16,7 +14,13 @@ export default async function handler(req, res) {
     let waybackUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`;
     if (date) waybackUrl += `&timestamp=${date}`;
     
-    const waybackRes = await fetch(waybackUrl);
+    // THIS IS THE FIX - Wayback blocks requests with no User-Agent
+    const waybackRes = await fetch(waybackUrl, {
+      headers: {
+        'User-Agent': 'WaybackSnapshotAPI/1.0 (RapidAPI Wrapper)'
+      }
+    });
+    
     const data = await waybackRes.json();
     
     if (data.archived_snapshots?.closest?.available) {
@@ -30,10 +34,14 @@ export default async function handler(req, res) {
       return res.status(404).json({ 
         error: "No snapshot found for this URL/date",
         original_url: url,
-        available: false 
+        available: false,
+        wayback_response: data // debug line
       });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Wayback API error", details: error.message });
+    return res.status(500).json({ 
+      error: "Wayback API error", 
+      details: error.message 
+    });
   }
 }
